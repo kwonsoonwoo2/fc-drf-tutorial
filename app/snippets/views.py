@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 
@@ -28,3 +28,39 @@ def snippet_list(request):
             return JsonResponse(serializer.data, status=201)
         # invalid한 경우, error목록을 JSON형식으로 리턴하며 400(Bad request)상태코드 전달
         return JsonResponse(serializer.errors, status=400)
+
+
+@csrf_exempt
+def snippet_detail(request, pk):
+    try:
+        snippet = Snippet.objects.get(pk=pk)
+    except Snippet.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = SnippetSerializer(snippet)
+        return JsonResponse(serializer.data)
+
+    elif request.method == 'PUT':
+        data = JSONParser().parse(request)
+        # Serializer인스턴스 생성에 모델 클래스 인스턴스와 data를 함께 사용
+        # (전달받은 데이터로 인스턴스의 내용을 update예정)
+        serializer = SnippetSerializer(snippet, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'PATCH':
+        data = JSONParser().parse(request)
+        # partial=True
+        #  Serializer의 required=True필드의 값이 주어지지 않아도 valid하다고 판단
+        serializer = SnippetSerializer(snippet, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        snippet.delete()
+        return HttpResponse(status=204)
