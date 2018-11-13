@@ -27,4 +27,5 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'pk',
             'username',
+            'snippet_set',
         )
