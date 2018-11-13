@@ -2,8 +2,13 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 
-from .models import Snippet
-from .serializers import SnippetSerializer
+from ..models import Snippet
+from ..serializers import SnippetSerializer
+
+__all__ = (
+    'snippet_list',
+    'snippet_detail',
+)
 
 
 # CSRF검증에서 제외되는 view
